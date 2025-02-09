@@ -2,12 +2,27 @@ import { Character } from '@/types/Character';
 import { getTokensForLine } from './highlighter';
 import { BundledLanguage, ThemedToken } from 'shiki';
 
+function removeComments(code: string): string {
+  return code
+    // C-style 여러 줄 주석 (/** ... */ 포함)
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    // C-style 한 줄 주석 (// ...)
+    .replace(/\/\/.*/g, '')
+    // Python, Ruby, Shell 스타일 주석 (# ...)
+    .replace(/^#.*$/gm, '')
+    // Lua 주석 (-- ...)
+    .replace(/--.*$/gm, '')
+    // 시작과 끝의 빈 줄 제거
+    .trim();
+}
+
 export async function processCode(code: string, lang: BundledLanguage = 'typescript'): Promise<Character[]> {
   const characters: Character[] = [];
   let inIndentation = false;
 
   try {
-    const tokens = await getTokensForLine(code, lang);
+    const cleanCode = removeComments(code);
+    const tokens = await getTokensForLine(cleanCode, lang);
     
     for (const line of tokens) {
       for (const token of line as ThemedToken[]) {
