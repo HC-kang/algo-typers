@@ -1,5 +1,11 @@
 import { BundledLanguage } from 'shiki';
 
+interface GithubFile {
+  type: string;
+  name: string;
+  download_url: string;
+}
+
 export class CodeSnippet {
   private static readonly problems = [
     '3sum', 'alien-dictionary', 'best-time-to-buy-and-sell-stock',
@@ -22,17 +28,14 @@ export class CodeSnippet {
     try {
       const randomProblem = this.problems[Math.floor(Math.random() * this.problems.length)];
       
-      // 1. 먼저 문제 폴더의 파일 목록을 가져옴
       const folderResponse = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${randomProblem}`);
-      const files = await folderResponse.json();
+      const files = await folderResponse.json() as GithubFile[];
       
-      // 2. TypeScript 파일만 필터링
-      const tsFiles = files.filter((file: any) => file.name.endsWith('.ts'));
+      const tsFiles = files.filter((file: GithubFile) => file.name.endsWith('.ts'));
       if (tsFiles.length === 0) {
         throw new Error(`No TypeScript files found for problem: ${randomProblem}`);
       }
 
-      // 3. 랜덤하게 하나의 파일 선택
       const randomFile = tsFiles[Math.floor(Math.random() * tsFiles.length)];
       const code = await fetch(randomFile.download_url).then(res => res.text());
       

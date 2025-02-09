@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { CodeDisplay } from '@/components/molecules/CodeDisplay';
 import { Stats } from '@/components/molecules/Stats';
 import { Text } from '@/components/atoms/Text';
-import { codeSnippets } from '@/utils/codeSnippets';
 import { processCode } from '@/utils/codeProcessor';
 import { Character } from '@/types/Character';
 import { initHighlighter } from '@/utils/highlighter';

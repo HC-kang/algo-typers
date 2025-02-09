@@ -6,7 +6,7 @@ interface CodeDisplayProps {
   currentIndex: number;
 }
 
-export const CodeDisplay = ({ characters = [], currentIndex }: CodeDisplayProps) => {
+export const CodeDisplay = ({ characters, currentIndex }: CodeDisplayProps) => {
   // 배열이 아닌 경우를 대비한 안전 장치
   const charArray = Array.isArray(characters) ? characters : [];
 
@@ -27,7 +27,7 @@ export const CodeDisplay = ({ characters = [], currentIndex }: CodeDisplayProps)
 
   return (
     <pre className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg overflow-x-auto">
-      {renderCharacters.map(({ char, displayIndex, isCurrent }, index) => {
+      {renderCharacters.map(({ char, isCurrent }, index) => {
         if (char.isNewline) {
           return (
             <span key={index}>
