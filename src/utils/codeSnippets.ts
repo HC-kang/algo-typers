@@ -1,11 +1,12 @@
-import { BundledLanguage } from 'shiki';
+import { CodeSnippet } from '@/types/CodeSnippet';
 
-interface CodeSnippet {
-  id: string;
-  title: string;
-  code: string;
-  source: string;
-  lang: BundledLanguage;
+let currentSnippet: CodeSnippet | null = null;
+
+export async function getRandomCodeSnippets(): Promise<CodeSnippet[]> {
+  if (!currentSnippet) {
+    currentSnippet = await CodeSnippet.fetchRandomSnippet();
+  }
+  return [currentSnippet];
 }
 
 export const codeSnippets: CodeSnippet[] = [

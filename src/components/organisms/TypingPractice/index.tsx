@@ -8,6 +8,8 @@ import { codeSnippets } from '@/utils/codeSnippets';
 import { processCode } from '@/utils/codeProcessor';
 import { Character } from '@/types/Character';
 import { initHighlighter } from '@/utils/highlighter';
+import { CodeSnippet } from '@/types/CodeSnippet';
+import { getRandomCodeSnippets } from '@/utils/codeSnippets';
 
 const IGNORE_KEYS = [
   'Shift', 'Control', 'Alt', 'Meta', 'CapsLock', 
@@ -26,23 +28,31 @@ export const TypingPractice = () => {
   const [accuracy, setAccuracy] = useState(100);
   const [isLoading, setIsLoading] = useState(true);
   const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
+  const [snippets, setSnippets] = useState<CodeSnippet[]>([]);
 
-  const currentSnippet = codeSnippets[currentSnippetIndex];
+  const currentSnippet = snippets[currentSnippetIndex];
+
+  // 초기 코드 스니펫 로드
+  useEffect(() => {
+    getRandomCodeSnippets().then(setSnippets);
+  }, []);
 
   // 하이라이터 초기화 및 초기 코드 처리
   useEffect(() => {
     const init = async () => {
       try {
         await initHighlighter();
-        const chars = await processCode(currentSnippet.code, 'typescript');
-        setCharacters(chars);
+        if (currentSnippet) {  // currentSnippet이 있을 때만 처리
+          const chars = await processCode(currentSnippet.code, 'typescript');
+          setCharacters(chars);
+        }
         setIsLoading(false);
       } catch (error) {
         console.error('Failed to initialize:', error);
       }
     };
     init();
-  }, [currentSnippet.code]);
+  }, [currentSnippet]);  // currentSnippet 전체를 의존성으로 사용
 
   const calculateStats = useCallback(() => {
     if (!startTime) return;
@@ -79,11 +89,11 @@ export const TypingPractice = () => {
       clearInterval(timer);
       setTimer(null);
     }
-    if (currentSnippetIndex < codeSnippets.length - 1) {
+    if (currentSnippetIndex < snippets.length - 1) {
       setCurrentSnippetIndex(prev => prev + 1);
       setCurrentIndex(0);
       setIsLoading(true);
-      processCode(codeSnippets[currentSnippetIndex + 1].code, 'typescript')
+      processCode(snippets[currentSnippetIndex + 1].code, 'typescript')
         .then(chars => {
           setCharacters(chars);
           setIsLoading(false);
@@ -95,7 +105,7 @@ export const TypingPractice = () => {
       setWpm(0);
       setAccuracy(100);
     }
-  }, [currentSnippetIndex, timer]);
+  }, [currentSnippetIndex, timer, snippets]);
 
   const handleKeyPress = useCallback((e: KeyboardEvent) => {
     // 새로고침 단축키 허용
@@ -181,7 +191,7 @@ export const TypingPractice = () => {
 
   const progress = (currentIndex / characters.length) * 100;
 
-  if (isLoading) {
+  if (isLoading || !currentSnippet) {
     return <div>Loading...</div>;
   }
 
